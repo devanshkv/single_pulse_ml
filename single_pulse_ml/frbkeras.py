@@ -15,11 +15,11 @@ import h5py
 
 import keras
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten, Merge
+from keras.layers import Dense, Dropout, Flatten, Concatenate
 from keras.layers import Conv1D, Conv2D
 from keras.layers import MaxPooling2D, MaxPooling1D, GlobalAveragePooling1D, BatchNormalization
 from keras.optimizers import SGD
-from keras.models import load_model
+from keras.models import load_model , Model
 
 
 def get_predictions(model, data, true_labels=None):
@@ -327,18 +327,24 @@ def merge_models(model_list, train_data_list,
     """
     
 
-    model = Sequential()
-    model.add(Merge(model_list, mode = 'concat'))
-    model.add(Dense(256, activation='relu'))
-    model.add(Dense(2, init = 'normal', activation = 'sigmoid'))
+    #model = Sequential()
+    #model.add(Merge(model_list, mode = 'concat'))
+    #model.add(Dense(256, activation='relu'))
+    #model.add(Dense(2, init = 'normal', activation = 'sigmoid'))
+
+    outlist=[each_model.output for each_model in model_list]
+    a=Concatenate()(outlist)
+    out1= Dense(256, activation='relu')(a)
+    out2=Dense(2, kernel_initializer = 'normal', activation = 'sigmoid')(out1)
     sgd = SGD(lr = 0.1, momentum = 0.9, decay = 0, nesterov = False)
+    model = Model([each_model.input for each_model in model_list],out2)
     model.compile(loss = 'binary_crossentropy', 
           optimizer=sgd, 
           metrics=['accuracy'])
     seed(2017)
+    
     model.fit(train_data_list, train_labels, 
                     batch_size=batch_size, nb_epoch=epochs, verbose=1)
     score = model.evaluate(eval_data_list, eval_labels, batch_size=batch_size)
 
     return model, score
-
