@@ -324,6 +324,7 @@ def merge_models(model_list, train_data_list,
                  batch_size=32, epochs=5):
     """ Take list of models, list of training data, 
     merge models and train as a single network. 
+    keras >=2.0 : https://stackoverflow.com/questions/45979848/merge-2-sequential-models-in-keras
     """
     
 
