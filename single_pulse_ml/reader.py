@@ -9,6 +9,7 @@ import numpy as np
 import h5py
 import glob
 import pickle
+os.environ['HDF5_USE_FILE_LOCKING']='FALSE'
 
 try:
 	import matplotlib.pylab as plt
@@ -58,6 +59,22 @@ def read_hdf5(fn):
     	params = []
 
     return data_freq, y, data_dm, data_mb, params
+
+def read_lists(h5_list,label_list):
+    assert len(label_list) == len(h5_list)
+    data_freq=[]
+    data_dm = []
+    y=[]
+    data_mb = None
+    params = []
+    for index, cand_file in enumerate(h5_list):
+        with h5py.File(cand_file, 'r') as f:
+            # the cand files save time x frequency, the model needs
+            # 32 freqs and 64 time bins
+            data_freq.append(rebin_arr(np.array(f['data_freq_time']).T,32,64))
+            data_dm.append(rebin_arr(np.array(f['data_dm_time']),100,64))
+            y.append(int(label_list[index]))
+    return np.array(data_freq), np.array(y), np.array(data_dm), data_mb, params
 
 def write_to_fil(data, header, fn):
 	filterbank.create_filterbank_file(

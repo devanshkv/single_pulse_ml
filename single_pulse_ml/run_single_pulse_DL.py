@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """ Script to train and test or multiple deep 
     neural networks. Input models are expected to be 
     sequential keras model saved as an .hdf5 file.
@@ -17,7 +18,7 @@ import sys
 import numpy as np 
 import time
 import h5py
-
+import pandas as pd
 #from single_pulse_ml import reader
 #from single_pulse_ml import frbkeras
 #from single_pulse_ml import plot_tools
@@ -28,7 +29,7 @@ import plot_tools
 
 try:
     import matplotlib 
-    matplotlib.use('Agg')
+#    matplotlib.use('Agg')
 
     import matplotlib.pyplot as plt
     from matplotlib import gridspec
@@ -38,22 +39,22 @@ except:
     pass
 
 FREQTIME=True     # train 2D frequency-time CNN
-TIME1D=False       # train 1D pulse-profile CNN
-DMTIME=False      # train 2D DM-time CNN
+TIME1D=True       # train 1D pulse-profile CNN
+DMTIME=True      # train 2D DM-time CNN
 MULTIBEAM=False    # train feed-forward NN on simulated multibeam data
 
 # If True, the different nets will be clipped after 
 # feature extraction layers and will not be compiled / fit
-MERGE=False
+MERGE=True
 
-MK_PLOT=False
+MK_PLOT=True
 CLASSIFY_ONLY=False
 save_classification=True
 model_nm = "./model/model_name"
 prob_threshold = 0.0
 
 ## Input hdf5 file. 
-fn = './data/input_data.hdf5'
+fn = './data/model.h5'
 
 # Save tf model as .hdf5
 save_model = True
@@ -61,7 +62,7 @@ fnout = "./model/model_out_name"
 
 NDM=300          # number of DMs in input array
 WIDTH=64         # width to use of arrays along time axis 
-train_size=0.5   # fraction of dataset to train on
+train_size=0.90   # fraction of dataset to train on
 
 ftype = fn.split('.')[-1]
 
@@ -75,7 +76,9 @@ metrics = ["accuracy", "precision", "false_negatives", "recall"]
 
 if __name__=='__main__':
     # read in time-freq data, labels, dm-time data
-    data_freq, y, data_dm, data_mb, params = reader.read_hdf5(fn)
+    df=pd.read_csv('mongo/test.csv')
+    data_freq, y, data_dm, data_mb, params = reader.read_lists(df['data'].tolist(),df['label'].tolist())
+    #data_freq, y, data_dm, data_mb = reader.read_hdf5(fn)
     NTRIGGER = len(y)
 
     print("Using %s" % fn)
