@@ -50,7 +50,7 @@ MERGE=True
 MK_PLOT=True
 CLASSIFY_ONLY=False
 save_classification=True
-model_nm = "./model/model_name"
+model_nm = "./model/model_out_name"
 prob_threshold = 0.0
 
 ## Input hdf5 file. 
@@ -62,7 +62,7 @@ fnout = "./model/model_out_name"
 
 NDM=300          # number of DMs in input array
 WIDTH=64         # width to use of arrays along time axis 
-train_size=0.90   # fraction of dataset to train on
+train_size=0.80   # fraction of dataset to train on
 
 ftype = fn.split('.')[-1]
 
@@ -436,7 +436,7 @@ if __name__=='__main__':
             model_merged_nm = model_nm + '_merged.hdf5'
 
             model_merged = frbkeras.load_model(model_merged_nm)
-            y_pred_prob = model_merged.predict(data_list)
+            y_pred_prob = model_merged.predict(eval_data_list)
             y_pred = np.round(y_pred_prob[:,1])
 
             print("Mistakes: %s" % np.where(y_pred!=y)[0])
